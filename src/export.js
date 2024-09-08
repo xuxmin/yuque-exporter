@@ -61,7 +61,7 @@ async function exportMarkDownFileTree(page, folderPath, book, node) {
 
 // browserpage, bookName, url
 async function downloadMardown(page, rootPath, book, mdname, docUrl) {
-    const url = 'https://www.yuque.com/' + docUrl + '/markdown?attachment=true&latexcode=false&anchor=false&linebreak=false';
+    const url = 'https://www.yuque.com/' + docUrl + '/markdown?attachment=true&latexcode=true&anchor=false&linebreak=false';
     // console.log(book + "/" + mdname + "'s download URL is: " + url)
     // console.log(rootPath)
 
