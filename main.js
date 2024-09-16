@@ -6,6 +6,8 @@ import { autoLogin } from './src/login.js';
 import { getAllBooks } from './src/toc.js';
 import { exportMarkDownFiles } from './src/export.js';
 // import { printDirectoryTree } from './src/toc.js';
+import { logger } from "./src/const.js";
+import { DOWNLOAD_BOOKS, FILE_SUCCESS, FILE_FAIL } from "./src/data.js"
 
 
 let color = {
@@ -33,7 +35,7 @@ async function run() {
             fs.mkdirSync(outputDir);
         }
         process.env.EXPORT_PATH = outputDir;
-        console.log(`The environment variable EXPORT_PATH is not set, so the default ${outputDir} is used as the export path.`)
+        logger.info(`The environment variable EXPORT_PATH is not set, so the default ${outputDir} is used as the export path.`)
     }
 
     // const page = await BrowserPage.getInstance();
@@ -42,16 +44,26 @@ async function run() {
 
     // 检查是否存在 cookie 文件
     await autoLogin(page)
-    console.log(color.green("Login successfully!"))
-    console.log()
+    logger.info(color.green("Login successfully!"))
 
-    console.log("Get book stacks ...")
+    logger.info("Get book stacks ...")
     const books = await getAllBooks(page)
-    // console.log(books)
 
-    console.log("Start export all books ...")
-    await exportMarkDownFiles(page, books)
+    logger.info("Start export all books ...")
+    // await exportMarkDownFiles(page, books)
 
+    var SummaryData = 
+    `
+<<<<<<<<<<<<<<<<<<< Summary >>>>>>>>>>>>>>>>>>>>>>>
+Total ${DOWNLOAD_BOOKS.length} books need update.
+    ${DOWNLOAD_BOOKS}.
+
+These files download success: ${FILE_SUCCESS}
+
+These files download fail: ${FILE_FAIL}
+<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    `
+    logger.info(`${SummaryData}`);
     browser.close()
 };
 

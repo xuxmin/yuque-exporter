@@ -161,3 +161,20 @@ const browser = await puppeteer.launch({ headless: true, executablePath: '/usr/b
 const browser = await puppeteer.launch({ headless: false, executablePath: "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe" });
 ```
 
+## 功能增加
+
+日志支持, 安装 winston：
+```bash
+npm i winston -S
+# 每日滚动日志
+npm install winston-daily-rotate-file --save
+```
+
+导出到指定路径，保存日志文件：
+
+```bash
+USER=xxx PASSWORD=xxx EXPORT_PATH=/path/to/exporter node main.js > log/log.txt
+```
+
+
+

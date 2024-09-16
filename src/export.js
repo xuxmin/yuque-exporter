@@ -1,23 +1,24 @@
 import fs from 'fs';
 import path from 'path';
 import { type } from './const.js';
+import { FILE_SUCCESS, FILE_FAIL } from './data.js'
+import { logger } from "./const.js";
 
 export async function exportMarkDownFiles(page, books) {
     const folderPath = process.env.EXPORT_PATH;
-    console.log("download folderPath: " + folderPath)
+    logger.info("download folderPath: " + folderPath)
     if (!fs.existsSync(folderPath)) {
-        console.error(`export path:${folderPath} is not exist`)
+        logger.error(`export path:${folderPath} is not exist`)
         process.exit(1)
     }
 
-    // console.log(books)
+    // logger.info(books)
     for ( let i = 0; i < books.length; i++ ) {
         await exportMarkDownFileTree(page, folderPath, books[i], books[i].root)
-        console.log();
+        logger.log();
     }
 
-    console.log(`=====> Export successfully! Have a good day!`);
-    console.log();
+    logger.log(`=====> Export successfully! Have a good day!`);
 }
 
 
@@ -62,8 +63,8 @@ async function exportMarkDownFileTree(page, folderPath, book, node) {
 // browserpage, bookName, url
 async function downloadMardown(page, rootPath, book, mdname, docUrl) {
     const url = 'https://www.yuque.com/' + docUrl + '/markdown?attachment=true&latexcode=true&anchor=false&linebreak=false';
-    // console.log(book + "/" + mdname + "'s download URL is: " + url)
-    // console.log(rootPath)
+    // logger.info(book + "/" + mdname + "'s download URL is: " + url)
+    // logger.info(rootPath)
 
     await downloadFile(page, rootPath, book, mdname, url)
     // await page.waitForTimeout(1000);
@@ -75,19 +76,21 @@ async function downloadFile(page, rootPath, book, mdname, url, maxRetries = 3) {
     async function downloadWithRetries() {
         try {
             await goto(page, url);
-            console.log(`Waiting download document to ${rootPath}\\${mdname}`);
+            logger.log(`Waiting download document to ${rootPath}\\${mdname}`);
             const fileNameWithExt = await waitForDownload(rootPath, book, mdname);
             const fileName = path.basename(fileNameWithExt, path.extname(fileNameWithExt));
-            console.log("Download document " + book + "/" + fileName + " finished");
-            console.log();
+            logger.log("Download document " + book + "/" + fileName + " finished");
+            logger.log();
+            FILE_SUCCESS.push(mdname);
         } catch (error) {
-            console.log(error);
+            logger.log(error);
             if (retries < maxRetries) {
-                console.log(`Retrying download... (attempt ${retries + 1})`);
+                logger.warning(`Retrying download... (attempt ${retries + 1})`);
                 retries++;
                 await downloadWithRetries();
             } else {
-                console.log(`Download error after ${maxRetries} retries: ${error}`);
+                logger.error(`Download error after ${maxRetries} retries: ${error}`);
+                FILE_FAIL.push(mdname);
             }
         }
     }
@@ -104,11 +107,11 @@ async function goto(page, link) {
 async function waitForDownload(rootPath, book, mdname, started = false) {
     const timeout = 10000; // 10s timeout
     return new Promise((resolve, reject) => {
-        // console.log(`======> watch ${rootPath} ${mdname}.md`)
+        // logger.info(`======> watch ${rootPath} ${mdname}.md`)
         const watcher = fs.watch(rootPath, (eventType, filename) => {
-            // console.log(`watch ${rootPath} ${eventType} ${filename}, want ${mdname}.md`)
+            // logger.info(`watch ${rootPath} ${eventType} ${filename}, want ${mdname}.md`)
             if (eventType === 'rename' && filename === `${mdname}.md.crdownload` && !started) {
-                console.log("Downloading document " + book + "/" + mdname)
+                logger.info("Downloading document " + book + "/" + mdname)
                 started = true
             }
 

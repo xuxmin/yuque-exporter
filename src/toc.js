@@ -2,6 +2,8 @@ import fs from 'fs';
 import { Readable } from 'stream';
 import { type } from './const.js';
 import jsonstream from 'jsonstream';
+import { DOWNLOAD_BOOKS } from './data.js'
+import { logger } from "./const.js";
 
 class BookPage {
     constructor(id, uuid, name, url, type, parent_uuid, child_uuid, sibling_uuid) {
@@ -44,8 +46,20 @@ export async function getAllBooks(page) {
         parser.end(data);
     });
 
+    var date = new Date();
+    const currentTime = date.getTime();
+    logger.info(`Current time is: ${currentTime}, Only download files updated 10 days ago`);
+
     for (const object of bookData) {
         for (let i = 0; i < object.books.length; i++) {
+            var updateTime = new Date(object.books[i].updated_at).getTime();
+            var deltaUpdateDay = (currentTime - updateTime) / (1000 * 3600 * 24);
+            // 增量更新, 仅拉取最近 7 天内更新的文件
+            if (deltaUpdateDay > 0.01) {
+                logger.info(`Skip book: ${object.books[i].name}`)
+                continue;
+            }
+            DOWNLOAD_BOOKS.push(object.books[i].name);
             const book = new Book(object.books[i].id, delNonStdChars(object.books[i].name), object.books[i].slug);
             book.root = await getBookDetail(page, book);
             book.user_url = object.books[i].user.login
@@ -53,7 +67,7 @@ export async function getAllBooks(page) {
         }
     }
 
-    console.log(`Books count is: ${books.length}`);
+    logger.info(`Books count is: ${books.length}`);
     return books;
 }
 

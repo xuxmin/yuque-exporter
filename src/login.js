@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { logger } from "./const.js";
 
 export async function autoLogin(page) {
     const cookieFile = './cookies.json';
@@ -10,18 +11,18 @@ export async function autoLogin(page) {
   
     // 如果存在 cookie，则直接加载
     if (cookies.length > 0) {
-      console.log("Login use cookies...")
+      logger.info("Login use cookies...")
       await page.setCookie(...cookies);
       await page.goto('https://www.yuque.com/dashboard');
     } else {
-      console.log("Login use user + password...")
+      logger.info("Login use user + password...")
       if (!process.env.USER) {
-        console.log('no cookie so use env var: USER required')
+        logger.info('no cookie so use env var: USER required')
         process.exit(1);
       }
       
       if (!process.env.PASSWORD) {
-        console.log('no cookie so use env var: PASSWORD required')
+        logger.info('no cookie so use env var: PASSWORD required')
         process.exit(1);
       }
   
@@ -48,14 +49,14 @@ export async function autoLogin(page) {
       cookies = await page.cookies();
       fs.writeFileSync(cookieFile, JSON.stringify(cookies));
       
-      console.log("Save cookie to cookies.json")
+      logger.info("Save cookie to cookies.json")
     }
 }
 
 async function scrollCaptcha(page) {
   const start = await page.$('span[id="nc_2_n1z"]');
   const startinfo = await start.boundingBox();
-  // console.log(startinfo.x)
+  // logger.info(startinfo.x)
   const end =  await page.waitForSelector('.nc-lang-cnt');
   const endinfo = await end.boundingBox();
   
