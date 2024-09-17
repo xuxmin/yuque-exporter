@@ -15,10 +15,10 @@ export async function exportMarkDownFiles(page, books) {
     // logger.info(books)
     for ( let i = 0; i < books.length; i++ ) {
         await exportMarkDownFileTree(page, folderPath, books[i], books[i].root)
-        logger.log();
+        logger.info();
     }
 
-    logger.log(`=====> Export successfully! Have a good day!`);
+    logger.info(`=====> Export successfully! Have a good day!`);
 }
 
 
@@ -76,20 +76,19 @@ async function downloadFile(page, rootPath, book, mdname, url, maxRetries = 3) {
     async function downloadWithRetries() {
         try {
             await goto(page, url);
-            logger.log(`Waiting download document to ${rootPath}\\${mdname}`);
+            logger.info(`Waiting download document to ${rootPath}\\${mdname}`);
             const fileNameWithExt = await waitForDownload(rootPath, book, mdname);
             const fileName = path.basename(fileNameWithExt, path.extname(fileNameWithExt));
-            logger.log("Download document " + book + "/" + fileName + " finished");
-            logger.log();
+            logger.info("Download document " + book + "/" + fileName + " finished");
             FILE_SUCCESS.push(mdname);
         } catch (error) {
-            logger.log(error);
+            logger.info(error);
             if (retries < maxRetries) {
-                logger.warning(`Retrying download... (attempt ${retries + 1})`);
+                logger.warn("Retrying download... (attempt " + retries + " )");
                 retries++;
                 await downloadWithRetries();
             } else {
-                logger.error(`Download error after ${maxRetries} retries: ${error}`);
+                logger.error("Download error after " + maxRetries + " retries: " + error);
                 FILE_FAIL.push(mdname);
             }
         }

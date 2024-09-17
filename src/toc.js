@@ -55,10 +55,10 @@ export async function getAllBooks(page) {
             var updateTime = new Date(object.books[i].updated_at).getTime();
             var deltaUpdateDay = (currentTime - updateTime) / (1000 * 3600 * 24);
             // 增量更新, 仅拉取最近 7 天内更新的文件
-            if (deltaUpdateDay > 0.01) {
-                logger.info(`Skip book: ${object.books[i].name}`)
-                continue;
-            }
+            // if (deltaUpdateDay > 10) {
+            //     logger.info(`Skip book: ${object.books[i].name}`)
+            //     continue;
+            // }
             DOWNLOAD_BOOKS.push(object.books[i].name);
             const book = new Book(object.books[i].id, delNonStdChars(object.books[i].name), object.books[i].slug);
             book.root = await getBookDetail(page, book);

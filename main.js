@@ -50,7 +50,7 @@ async function run() {
     const books = await getAllBooks(page)
 
     logger.info("Start export all books ...")
-    // await exportMarkDownFiles(page, books)
+    await exportMarkDownFiles(page, books)
 
     var SummaryData = 
     `
